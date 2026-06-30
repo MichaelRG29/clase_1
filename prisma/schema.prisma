@@ -1,0 +1,78 @@
+datasource db {
+  provider = "postgresql"
+
+}
+generator client {
+  provider = "prisma-client-js"
+
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+  CANCELLED
+
+  @@map("task_status")
+}
+
+model User {
+  id           String    @id @default(uuid()) @db.Uuid
+  name         String
+  email        String    @unique
+  passwordHash String    @map("password_hash")
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  projects     Project[] @relation("UserProjects")
+  tasks        Task[]    @relation("UserTasks")
+  comments     Comment[] @relation("UserComments")
+
+  @@map("users")
+}
+
+model Project {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String
+  description String?
+  ownerId     String   @map("owner_id") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  owner       User     @relation("UserProjects", fields: [ownerId], references: [id], onDelete: Cascade)
+  tasks       Task[]   @relation("ProjectTasks")
+
+  @@index([ownerId])
+  @@map("projects")
+}
+
+model Task {
+  id          String     @id @default(uuid()) @db.Uuid
+  title       String
+  description String?
+  status      TaskStatus @default(TODO)
+  projectId   String     @map("project_id") @db.Uuid
+  assignedTo  String?    @map("assigned_to") @db.Uuid
+  createdAt   DateTime   @default(now()) @map("created_at")
+
+  project     Project    @relation("ProjectTasks", fields: [projectId], references: [id], onDelete: Cascade)
+  assignee    User?      @relation("UserTasks", fields: [assignedTo], references: [id], onDelete: SetNull)
+  comments    Comment[]  @relation("TaskComments")
+
+  @@index([projectId])
+  @@index([assignedTo])
+  @@map("tasks")
+}
+
+model Comment {
+  id        String   @id @default(uuid()) @db.Uuid
+  content   String
+  taskId    String   @map("task_id") @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+
+  task      Task     @relation("TaskComments", fields: [taskId], references: [id], onDelete: Cascade)
+  user      User     @relation("UserComments", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([taskId])
+  @@index([userId])
+  @@map("comments")
+}
