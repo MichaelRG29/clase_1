@@ -1,44 +1,62 @@
 import prisma from '../config/prisma';
-import { CreateProjectDto, UpdateProjectDto, ProjectPublic } from
-'../types/projects.types';
+import { CreateProjectDto, UpdateProjectDto, ProjectPublic } from '../types/projects.types';
+
+const PROJECT_SELECT = {
+  id: true,
+  name: true,
+  description: true,
+  ownerId: true,
+  createdAt: true,
+} as const;
+
 export const projectsService = {
- // Lista todos los proyectos con el conteo de tareas de cada uno
- async findAll() {
- return prisma.project.findMany({
- orderBy: { createdAt: "desc" },
- include: {
- // _count agrega un campo con el número de registros relacionados
- // Es mucho más eficiente que cargar todas las tareas
- _count: { select: { tasks: true } },
- },
- });
- },
- // Obtiene un proyecto con su dueño y el conteo de tareas
- async findById(id: string) {
- return prisma.project.findUnique({
- where: { id },
-     include: {
-     owner: { select: { id: true, name: true, email: true } },
- _count: { select: { tasks: true } },
- },
- });
- },
- async create(data: CreateProjectDto): Promise<ProjectPublic> {
- return prisma.project.create({
- data: {
- name: data.name,
- description: data.description,
- ownerId: data.ownerId,
- },
- });
- },
- async update(id: string, data: UpdateProjectDto): Promise<ProjectPublic> {
- return prisma.project.update({
- where: { id },
- data,
- });
- },
- async remove(id: string): Promise<void> {
- await prisma.project.delete({ where: { id } });
- },
+  async findAll(): Promise<ProjectPublic[]> {
+    return prisma.project.findMany({
+      select: PROJECT_SELECT,
+      orderBy: { createdAt: 'desc' },
+    });
+  },
+
+  async findById(id: string): Promise<ProjectPublic | null> {
+    return prisma.project.findUnique({
+      where: { id },
+      select: PROJECT_SELECT,
+    });
+  },
+
+  async findByOwner(ownerId: string): Promise<ProjectPublic[]> {
+    return prisma.project.findMany({
+      where: { ownerId },
+      select: PROJECT_SELECT,
+      orderBy: { createdAt: 'desc' },
+    });
+  },
+
+  async create(data: CreateProjectDto): Promise<ProjectPublic> {
+    return prisma.project.create({
+      data: {
+        name: data.name,
+        description: data.description,
+        ownerId: data.ownerId,
+      },
+      select: PROJECT_SELECT,
+    });
+  },
+
+  async update(id: string, data: UpdateProjectDto): Promise<ProjectPublic | null> {
+    const existing = await prisma.project.findUnique({ where: { id } });
+    if (!existing) return null;
+    return prisma.project.update({
+      where: { id },
+      data,
+      select: PROJECT_SELECT,
+    });
+  },
+
+  async remove(id: string): Promise<boolean> {
+    const existing = await prisma.project.findUnique({ where: { id } });
+    if (!existing) return false;
+    await prisma.project.delete({ where: { id } });
+    return true;
+  },
 };

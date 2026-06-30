@@ -1,74 +1,46 @@
 import { Request, Response } from 'express';
 import { usersService } from '../services/users.service';
-import { CreateUserDto, UpdateUserDto } from '../types/users.types';
-import { handlePrismaError } from '../helpers/error-handler';
+import { NotFoundError, ValidationError } from '../helpers/errors';
+import { createUserSchema, updateUserSchema } from '../validators/users.validator';
+
 export const usersController = {
- // GET /api/users — Lista todos los usuarios
- async getAll(req: Request, res: Response): Promise<void> {
- try {
- const users = await usersService.findAll();
- res.json({ data: users, count: users.length });
-  } catch (error: unknown) {
-  if (handlePrismaError(res, error)) return;
-  res.status(500).json({ error: "Error al obtener usuarios" });
-  }
- },
- // GET /api/users/:id — Obtiene un usuario por su ID
- async getById(req: Request, res: Response): Promise<void> {
- try {
- const user = await usersService.findById(req.params.id as string);
- if (!user) {
- res.status(404).json({ error: "Usuario no encontrado" });
- return;
- }
- res.json({ data: user });
-  } catch (error: unknown) {
-  if (handlePrismaError(res, error)) return;
-  res.status(500).json({ error: "Error al obtener el usuario" });
-  }
- },
- // POST /api/users — Crea un nuevo usuario
- async create(req: Request, res: Response): Promise<void> {
- try {
- const { name, email, password } = req.body as CreateUserDto;
- // Validación básica de campos requeridos
- if (!name || !email || !password) {
- res.status(400).json({ error: "name, email y password son requeridos"
-});
- return;
- }
- // Verificar que el email no exista ya
- const exists = await usersService.existsByEmail(email);
- if (exists) {
- res.status(409).json({ error: "El email ya está registrado" });
- return;
- }
- const user = await usersService.create({ name, email, password });
- res.status(201).json({ data: user });
-  } catch (error: unknown) {
-  if (handlePrismaError(res, error)) return;
-  res.status(500).json({ error: "Error al crear el usuario" });
-  }
- },
- // PUT /api/users/:id — Actualiza un usuario
- async update(req: Request, res: Response): Promise<void> {
- try {
- const { name, email } = req.body as UpdateUserDto;
- const user = await usersService.update(req.params.id as string, { name, email });
- res.json({ data: user });
-     } catch (error: unknown) {
-       if (handlePrismaError(res, error)) return;
-       res.status(500).json({ error: "Error al actualizar el usuario" });
- }
- },
- // DELETE /api/users/:id — Elimina un usuario
- async remove(req: Request, res: Response): Promise<void> {
- try {
- await usersService.remove(req.params.id as string);
- res.status(204).send(); // 204 = No Content (éxito sin body)
-     } catch (error: unknown) {
-       if (handlePrismaError(res, error)) return;
-       res.status(500).json({ error: "Error al eliminar el usuario" });
- }
- },
+  async getAll(_req: Request, res: Response): Promise<void> {
+    const users = await usersService.findAll();
+    res.json({ data: users, count: users.length });
+  },
+
+  async getById(req: Request, res: Response): Promise<void> {
+    const user = await usersService.findById(req.params.id as string);
+    if (!user) throw new NotFoundError('Usuario');
+    res.json({ data: user });
+  },
+
+  async create(req: Request, res: Response): Promise<void> {
+    const parsed = createUserSchema.safeParse(req.body);
+    if (!parsed.success) {
+      throw new ValidationError(parsed.error.issues[0].message);
+    }
+    const user = await usersService.create(parsed.data);
+    res.status(201).json({ data: user });
+  },
+
+  async update(req: Request, res: Response): Promise<void> {
+    if (!req.body) throw new ValidationError('Cuerpo de solicitud requerido');
+    const parsed = updateUserSchema.safeParse(req.body);
+    if (!parsed.success) {
+      throw new ValidationError(parsed.error.issues[0].message);
+    }
+    if (Object.keys(parsed.data).length === 0) {
+      throw new ValidationError('No se enviaron campos para actualizar');
+    }
+    const user = await usersService.update(req.params.id as string, parsed.data);
+    if (!user) throw new NotFoundError('Usuario');
+    res.json({ data: user });
+  },
+
+  async remove(req: Request, res: Response): Promise<void> {
+    const deleted = await usersService.remove(req.params.id as string);
+    if (!deleted) throw new NotFoundError('Usuario');
+    res.status(204).send();
+  },
 };
