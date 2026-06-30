@@ -1,7 +1,11 @@
 import express, { Application, Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import swaggerUi from 'swagger-ui-express';
 import healthRouter from './routes/health';
+import usersRoute from './routes/users';
+import { swaggerSpec } from './config/swagger';
+//import projectsRouter from './routes/projects';
 
 dotenv.config();
 
@@ -13,12 +17,15 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use('/health', healthRouter);
+app.use('/api/users', usersRoute);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+//app.use('/api/projects', projectsRouter);
 
 app.get('/', (req: Request, res: Response) => {
  res.json({
     project: 'TaskFlow API - Clase 1',
     version: '1.0.0',
-    docs: '/health',
+    docs: '/api-docs',
  });
 });
 
@@ -29,6 +36,7 @@ app.use((req: Request, res: Response) => {
 app.listen(PORT, () => {
  console.log('🚀 Servidor TaskFlow corriendo en  http://localhost:${PORT}');
  console.log(`🔍 Health: http://localhost:${PORT}/health`);
+ console.log(`📖 Docs (Swagger): http://localhost:${PORT}/api-docs`);
 });
 
 export default app;
