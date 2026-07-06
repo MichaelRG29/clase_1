@@ -2,17 +2,18 @@ import { Request, Response } from 'express';
 import { projectsService } from '../services/projects.service';
 import { NotFoundError, ValidationError } from '../helpers/errors';
 import { createProjectSchema, updateProjectSchema } from '../validators/projects.validator';
+import { sendSuccess, sendCreated, sendNoContent } from '../helpers/api-response';
 
 export const projectsController = {
   async getAll(_req: Request, res: Response): Promise<void> {
     const projects = await projectsService.findAll();
-    res.json({ data: projects, count: projects.length });
+    sendSuccess(res, 200, 'Proyectos obtenidos correctamente', { data: projects, count: projects.length });
   },
 
   async getById(req: Request, res: Response): Promise<void> {
     const project = await projectsService.findById(req.params.id as string);
     if (!project) throw new NotFoundError('Proyecto');
-    res.json({ data: project });
+    sendSuccess(res, 200, 'Proyecto encontrado', { data: project });
   },
 
   async create(req: Request, res: Response): Promise<void> {
@@ -21,7 +22,7 @@ export const projectsController = {
       throw new ValidationError(parsed.error.issues[0].message);
     }
     const project = await projectsService.create(parsed.data);
-    res.status(201).json({ data: project });
+    sendCreated(res, 'Proyecto creado exitosamente', { data: project });
   },
 
   async update(req: Request, res: Response): Promise<void> {
@@ -35,12 +36,12 @@ export const projectsController = {
     }
     const project = await projectsService.update(req.params.id as string, parsed.data);
     if (!project) throw new NotFoundError('Proyecto');
-    res.json({ data: project });
+    sendSuccess(res, 200, 'Proyecto actualizado correctamente', { data: project });
   },
 
   async remove(req: Request, res: Response): Promise<void> {
     const deleted = await projectsService.remove(req.params.id as string);
     if (!deleted) throw new NotFoundError('Proyecto');
-    res.status(204).send();
+    sendNoContent(res);
   },
 };

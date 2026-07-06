@@ -1,8 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 import { Prisma } from '@prisma/client';
-import { AppError } from './errors';
+import { AppError } from '../helpers/errors';
+import { sendError } from '../helpers/api-response';
 
-export function handlePrismaError(error: unknown): AppError | null {
+function handlePrismaError(error: unknown): AppError | null {
   if (error instanceof Prisma.PrismaClientKnownRequestError) {
     switch (error.code) {
       case 'P2025':
@@ -21,27 +22,30 @@ export function handlePrismaError(error: unknown): AppError | null {
   return null;
 }
 
-export function errorHandler(
+export const errorMiddleware = (
   err: Error,
   _req: Request,
   res: Response,
   _next: NextFunction
-): void {
+): void => {
   console.error(`[ERROR] ${err.name}: ${err.message}`);
 
   if (err instanceof AppError) {
-    res.status(err.statusCode).json({
-      error: err.message,
-      ...(err.details && { details: err.details }),
-    });
+    sendError(res, err.statusCode, err.message, err.details);
     return;
   }
 
   const prismaErr = handlePrismaError(err);
   if (prismaErr) {
-    res.status(prismaErr.statusCode).json({ error: prismaErr.message });
+    sendError(res, prismaErr.statusCode, prismaErr.message);
     return;
   }
 
-  res.status(500).json({ error: 'Error interno del servidor' });
-}
+  const anyErr = err as any;
+  if (anyErr?.status) {
+    sendError(res, anyErr.status, anyErr.message);
+    return;
+  }
+
+  sendError(res, 500, 'Error interno del servidor');
+};

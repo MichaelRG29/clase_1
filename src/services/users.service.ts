@@ -1,6 +1,9 @@
+import bcrypt from 'bcryptjs';
 import { Prisma } from '@prisma/client';
 import prisma from '../config/prisma';
 import { CreateUserDto, UpdateUserDto, UserPublic } from '../types/users.types';
+
+const SALT_ROUNDS = 10;
 
 const USER_SELECT = {
   id: true,
@@ -25,14 +28,11 @@ export const usersService = {
   },
 
   async create(data: CreateUserDto): Promise<UserPublic> {
+   const passwordHash = await bcrypt.hash(data.password, 10);
     return prisma.user.create({
-      data: {
-        name: data.name,
-        email: data.email,
-        passwordHash: data.password,
-      },
+      data: { name: data.name, email: data.email, passwordHash },
       select: USER_SELECT,
-    });
+});
   },
 
   async update(id: string, data: UpdateUserDto): Promise<UserPublic | null> {

@@ -5,8 +5,11 @@ import swaggerUi from 'swagger-ui-express';
 import healthRouter from './routes/health';
 import usersRoute from './routes/users';
 import projectsRouter from './routes/projects';
+import authRouter from './routes/auth';
+import commentsRouter from './routes/comments';
 import { swaggerSpec } from './config/swagger';
-import { errorHandler } from './helpers/error-handler';
+import { errorMiddleware } from './middleware/error.middleware';
+import { sendSuccess, sendError } from './helpers/api-response';
 
 dotenv.config();
 
@@ -20,20 +23,22 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/health', healthRouter);
 app.use('/api/users', usersRoute);
 app.use('/api/projects', projectsRouter);
+app.use('/auth', authRouter);
+app.use('/api/comments', commentsRouter);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.get('/', (_req: Request, res: Response) => {
-  res.json({
+  sendSuccess(res, 200, 'TaskFlow API funcionando correctamente', {
     project: 'TaskFlow API - Clase 1',
     version: '1.0.0',
     docs: '/api-docs',
   });
 });
 
-app.use(errorHandler);
+app.use(errorMiddleware);
 
 app.use((_req: Request, res: Response) => {
-  res.status(404).json({ error: 'Ruta no encontrada' });
+  sendError(res, 404, 'Ruta no encontrada');
 });
 
 app.listen(PORT, () => {
