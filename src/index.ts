@@ -16,7 +16,18 @@ dotenv.config();
 const app: Application = express();
 const PORT = process.env.PORT || '3000';
 
-app.use(cors());
+app.use(cors({
+    origin: [
+        'http://localhost:5173', //puerto por defecto
+        'http://localhost:5174', //si el 5173 esta ocupado
+        'http://localhost:4173', // vista preview
+    ],
+ credentials: true,
+ methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+ allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
