@@ -1,12 +1,37 @@
-import './App.css'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import { ProtectedRoute } from './components/ProtectedRoute';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+import DashboardPage from './pages/DashboardPage';
 
-function App() {
- return (
- <div className="min-h-screen bg-slate-900 flex items-center justify-center">
- <h1 className="text-4xl font-bold text-emerald-400">
- ✅ Tailwind v4 funcionando
- </h1>
- </div>
- );
+import './App.css'
+import ProjectsPage from './pages/ProjectsPage';
+import ProjectDetailPage from './pages/ProjectDetailPage';
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AuthProvider>
+        <Routes>
+          {/* Rutas públicas */}
+          <Route path="/login"    element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+
+          {/* Rutas protegidas — anidadas bajo ProtectedRoute */}
+          <Route element={<ProtectedRoute />}>
+            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/projects" element={<ProjectsPage />} />
+            <Route path="/projects/:id" element={<ProjectDetailPage />} />
+          </Route>
+
+          {/* Ruta raíz → dashboard (ProtectedRoute redirigirá a /login si no autenticado) */}
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+
+          {/* Cualquier otra ruta desconocida → login */}
+          <Route path="*" element={<Navigate to="/login" replace />} />
+        </Routes>
+      </AuthProvider>
+    </BrowserRouter>
+  );
 }
-export default App
