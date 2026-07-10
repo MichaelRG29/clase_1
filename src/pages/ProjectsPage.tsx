@@ -1,4 +1,4 @@
-import { useState, useEffect, type SubmitEvent } from 'react';
+import { useState, useEffect, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { projectsService } from '../api/projects.service';
@@ -23,7 +23,7 @@ export default function ProjectsPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  const handleCreate = async (e: SubmitEvent) => {
+  const handleCreate = async (e: FormEvent) => {
     e.preventDefault();
     if (!user || !name.trim()) return;
     setCreating(true);
