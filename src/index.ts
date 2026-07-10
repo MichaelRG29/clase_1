@@ -34,7 +34,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/health', healthRouter);
 app.use('/api/users', usersRoute);
 app.use('/api/projects', projectsRouter);
-app.use('/auth', authRouter);
+app.use('/api/auth', authRouter);
 app.use('/api/comments', commentsRouter);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
