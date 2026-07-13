@@ -19,6 +19,9 @@ function handlePrismaError(error: unknown): AppError | null {
         return new AppError(500, 'Error inesperado en la base de datos');
     }
   }
+  if (error instanceof Prisma.PrismaClientValidationError) {
+    return new AppError(400, 'Datos inválidos');
+  }
   return null;
 }
 

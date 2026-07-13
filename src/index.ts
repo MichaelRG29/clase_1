@@ -7,6 +7,7 @@ import usersRoute from './routes/users';
 import projectsRouter from './routes/projects';
 import authRouter from './routes/auth';
 import commentsRouter from './routes/comments';
+import tasksRouter from './routes/tasks';
 import { swaggerSpec } from './config/swagger';
 import { errorMiddleware } from './middleware/error.middleware';
 import { sendSuccess, sendError } from './helpers/api-response';
@@ -36,6 +37,7 @@ app.use('/api/users', usersRoute);
 app.use('/api/projects', projectsRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/comments', commentsRouter);
+app.use('/api/tasks', tasksRouter);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.get('/', (_req: Request, res: Response) => {

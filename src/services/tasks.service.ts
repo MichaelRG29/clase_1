@@ -1,10 +1,13 @@
 import prisma from '../config/prisma';
 import { CreateTaskDto, UpdateTaskDto } from '../types/task.types';
 import { AppError } from '../helpers/errors';
+
 export const tasksService = {
  async findByProject(projectId: string, status?: string) {
  return prisma.task.findMany({
- where: { projectId, ...(status && { status: status as any }) },
+ where: { 
+      projectId, 
+      ...(status && { status: status as any }) },
  include: {
  assignee: { select: { id: true, name: true, email: true } },
  _count: { select: { comments: true } },
