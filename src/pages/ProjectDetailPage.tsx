@@ -1,10 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { DndContext, type DragEndEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { projectsService } from '../api/projects.service';
 import { tasksService } from '../api/tasks.service';
 import type { Project, Task, TaskStatus } from '../types';
 import { KANBAN_COLUMNS } from '../config/kanban';
 import { KanbanColumn } from '../components/KanbanColumn';
+import { DroppableColumn } from '../components/DroppableColumn';
 import { CreateTaskModal } from '../components/CreateTaskModal';
 
 export default function ProjectDetailPage() {
@@ -16,6 +18,20 @@ export default function ProjectDetailPage() {
   const [loading,  setLoading]  = useState(true);
   const [error,    setError]    = useState('');
   const [showModal,setShowModal]= useState(false);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over) return;
+    const taskId = active.id as string;
+    const newStatus = over.id as TaskStatus;
+    const currentStatus = tasks.find(t => t.id === taskId)?.status;
+    if (currentStatus === newStatus) return;
+    handleStatusChange(taskId, newStatus);
+  };
 
   const loadData = useCallback(async () => {
     if (!id) return;
@@ -98,18 +114,21 @@ export default function ProjectDetailPage() {
 
       {/* Tablero Kanban */}
       <main className="max-w-screen-xl mx-auto p-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {KANBAN_COLUMNS.map(col => (
-            <KanbanColumn
-              key={col.id}
-              config={col}
-              tasks={tasksByStatus[col.id] ?? []}
-              onStatusChange={handleStatusChange}
-              onDelete={handleDelete}
-              onAddTask={col.id === 'TODO' ? () => setShowModal(true) : undefined}
-            />
-          ))}
-        </div>
+        <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {KANBAN_COLUMNS.map(col => (
+              <DroppableColumn key={col.id} id={col.id}>
+                <KanbanColumn
+                  config={col}
+                  tasks={tasksByStatus[col.id] ?? []}
+                  onStatusChange={handleStatusChange}
+                  onDelete={handleDelete}
+                  onAddTask={col.id === 'TODO' ? () => setShowModal(true) : undefined}
+                />
+              </DroppableColumn>
+            ))}
+          </div>
+        </DndContext>
       </main>
 
       {showModal && project && (

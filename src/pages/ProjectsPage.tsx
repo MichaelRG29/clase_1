@@ -69,7 +69,7 @@ export default function ProjectsPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {projects.map(project => (
-            <div key = {project.id}
+            <div key={project.id}
               onClick={() => navigate(`/projects/${project.id}`)}
               className="bg-white rounded-xl border border-slate-200 p-5
                          hover:shadow-md hover:border-blue-300 cursor-pointer transition">
