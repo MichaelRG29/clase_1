@@ -1,13 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { DndContext, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
-import type { DragEndEvent } from '@dnd-kit/core';
 import { projectsService } from '../api/projects.service';
 import { tasksService } from '../api/tasks.service';
 import type { Project, Task, TaskStatus } from '../types';
 import { KANBAN_COLUMNS } from '../config/kanban';
 import { KanbanColumn } from '../components/KanbanColumn';
-import { DroppableColumn } from '../components/DroppableColumn';
 import { CreateTaskModal } from '../components/CreateTaskModal';
 
 export default function ProjectDetailPage() {
@@ -65,19 +62,6 @@ export default function ProjectDetailPage() {
     setShowModal(false);
   };
 
-  const sensors = useSensors(useSensor(PointerSensor, {
-    activationConstraint: { distance: 8 },
-  }));
-
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-    if (!over) return;
-    const taskId = active.id as string;
-    const newStatus = over.id as TaskStatus;
-    if (tasks.find(t => t.id === taskId)?.status === newStatus) return;
-    handleStatusChange(taskId, newStatus);
-  };
-
   // Agrupar tareas por estado para el Kanban
   const tasksByStatus = KANBAN_COLUMNS.reduce((acc, col) => {
     acc[col.id] = tasks.filter(t => t.status === col.id);
@@ -93,7 +77,7 @@ export default function ProjectDetailPage() {
   return (
     <div className="min-h-screen bg-slate-100">
       <header className="bg-white border-b border-slate-200 px-6 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
+        <div className="max-w-screen-xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button onClick={() => navigate('/projects')}
               className="text-slate-400 hover:text-slate-600 text-sm">
@@ -110,25 +94,22 @@ export default function ProjectDetailPage() {
         </div>
       </header>
 
-      {error && <div className="max-w-7xl mx-auto p-4">{error}</div>}
+      {error && <div className="max-w-screen-xl mx-auto p-4">{error}</div>}
 
       {/* Tablero Kanban */}
-      <main className="max-w-7xl mx-auto p-6">
-        <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {KANBAN_COLUMNS.map(col => (
-              <DroppableColumn key={col.id} id={col.id}>
-                <KanbanColumn
-                  config={col}
-                  tasks={tasksByStatus[col.id] ?? []}
-                  onStatusChange={handleStatusChange}
-                  onDelete={handleDelete}
-                  onAddTask={col.id === 'TODO' ? () => setShowModal(true) : undefined}
-                />
-              </DroppableColumn>
-            ))}
-          </div>
-        </DndContext>
+      <main className="max-w-screen-xl mx-auto p-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {KANBAN_COLUMNS.map(col => (
+            <KanbanColumn
+              key={col.id}
+              config={col}
+              tasks={tasksByStatus[col.id] ?? []}
+              onStatusChange={handleStatusChange}
+              onDelete={handleDelete}
+              onAddTask={col.id === 'TODO' ? () => setShowModal(true) : undefined}
+            />
+          ))}
+        </div>
       </main>
 
       {showModal && project && (

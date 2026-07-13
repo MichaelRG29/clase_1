@@ -26,10 +26,10 @@ export default function App() {
           </Route>
 
           {/* Ruta raíz → dashboard (ProtectedRoute redirigirá a /login si no autenticado) */}
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/" element={<Navigate to="/login" replace />} />
 
           {/* Cualquier otra ruta desconocida → login */}
-          <Route path="*" element={<Navigate to="/login" replace />} />
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>

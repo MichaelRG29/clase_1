@@ -1,4 +1,4 @@
-import { useState, type SubmitEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 import { tasksService } from '../api/tasks.service';
 import type { Task } from '../types';
 
@@ -14,7 +14,7 @@ export function CreateTaskModal({ projectId, onCreated, onClose }: Props) {
   const [loading,  setLoading]  = useState(false);
   const [error,    setError]    = useState('');
 
-  const handleSubmit = async (e: SubmitEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!title.trim()) return;
     setLoading(true); setError('');

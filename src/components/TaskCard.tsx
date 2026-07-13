@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useDraggable } from '@dnd-kit/core';
 import type { Task, TaskStatus } from '../types';
 import { KANBAN_COLUMNS } from '../config/kanban';
 
@@ -12,24 +11,10 @@ interface TaskCardProps {
 export function TaskCard({ task, onStatusChange, onDelete }: TaskCardProps) {
   const [hovered, setHovered] = useState(false);
 
-  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
-    id: task.id,
-  });
-
-  const style = transform ? {
-    transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-  } : undefined;
-
   return (
     <div
-      ref={setNodeRef}
-      style={style}
-      {...listeners}
-      {...attributes}
       className={`bg-white rounded-lg border border-slate-200 p-3 shadow-sm
-                  transition cursor-grab active:cursor-grabbing
-                  ${hovered ? 'shadow-md' : ''}
-                  ${isDragging ? 'opacity-50' : ''} relative group`}
+                  transition ${hovered ? 'shadow-md' : ''} relative group`}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >

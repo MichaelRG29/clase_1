@@ -2,6 +2,8 @@ import { useState, useEffect, type ReactNode } from 'react';
 import { AuthContext } from './AuthContextDef';
 import type { User } from '../types';
 
+export { useAuth } from '../hooks/useAuth';
+
 const TOKEN_KEY = 'taskflow_token';
 const USER_KEY = 'taskflow_user';
 
