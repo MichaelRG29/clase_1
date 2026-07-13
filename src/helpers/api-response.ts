@@ -36,3 +36,11 @@ export function sendError(res: Response, status: number, message: string, error?
   };
   res.status(status).json(body);
 }
+
+export function success<T>(res: Response, data?: T, message = 'Operación exitosa', status = 200): void {
+  sendSuccess(res, status, message, data);
+}
+
+export function error(res: Response, message = 'Error interno', status = 500): void {
+  sendError(res, status, message, message);
+}

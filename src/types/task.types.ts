@@ -1,15 +1,16 @@
-import { Task, TaskStatus } from '@prisma/client';
-export type TaskPublic = Task;
+import { TaskStatus } from '@prisma/client';
+
 export interface CreateTaskDto {
- title: string;
+  title: string;
   description?: string;
- status?: TaskStatus;
- projectId: string;
- assignedTo?: string;
+  status?: TaskStatus;
+  projectId: string;
+  assignedTo?: string;
 }
+
 export interface UpdateTaskDto {
- title?: string;
- description?: string;
- status?: TaskStatus;
- assignedTo?: string | null;
+  title?: string;
+  description?: string;
+  status?: TaskStatus;
+  assignedTo?: string | null;
 }

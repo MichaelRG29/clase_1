@@ -1,13 +1,17 @@
 import { User } from '@prisma/client';
-// Tipo público: lo que la API devuelve (sin la contraseña)
+
+// Tipo público: excluye passwordHash de las respuestas de la API
 export type UserPublic = Omit<User, 'passwordHash'>;
-// DTO = Data Transfer Object: define qué datos recibe el endpoint
+
+// DTO para crear un usuario (Data Transfer Object)
 export interface CreateUserDto {
- name: string;
- email: string;
- password: string; // En Clase 3 hashearemos esto con bcrypt
+  name: string;
+  email: string;
+  password: string;  // Se guardará como passwordHash en Clase 3 con bcrypt
 }
+
+// DTO para actualizar un usuario (todos los campos opcionales)
 export interface UpdateUserDto {
- name?: string;
- email?: string;
+  name?: string;
+  email?: string;
 }
