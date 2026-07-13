@@ -9,6 +9,8 @@ import './App.css'
 import ProjectsPage from './pages/ProjectsPage';
 import ProjectDetailPage from './pages/ProjectDetailPage';
 
+//import SettingsPage from './pages/SettingsPage';
+
 export default function App() {
   return (
     <BrowserRouter>

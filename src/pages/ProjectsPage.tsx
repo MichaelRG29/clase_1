@@ -44,6 +44,11 @@ export default function ProjectsPage() {
     <div className="min-h-screen bg-slate-100">
       {/* Header */}
       <header className="bg-white border-b border-slate-200 px-6 py-4 flex justify-between items-center">
+          <button onClick={() => navigate('/dashboard')}
+              className="text-slate-400 hover:text-slate-600 text-sm">
+              ← Inicio
+        </button>
+            <span className="text-slate-400">/</span>
         <h1 className="text-xl font-bold text-slate-800">TaskFlow — Proyectos</h1>
         <button onClick={() => setShowModal(true)}
           className="bg-blue-600 hover:bg-blue-700 text-white text-sm

@@ -3,10 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 
 const menuItems = [
-  { label: 'Inicio', icon: '🏠', active: true },
-  { label: 'Tareas', icon: '📋', active: false },
-  { label: 'Proyectos', icon: '📅', active: false },
-  { label: 'Configuración', icon: '⚙️', active: false },
+  { label: 'Inicio', icon: '🏠', path: '/dashboard' },
+  { label: 'Tareas', icon: '📋', path: '/tasks' },
+  { label: 'Proyectos', icon: '📅', path: '/projects' },
+  { label: 'Configuración', icon: '⚙️', path: '/settings' },
 ];
 
 export default function DashboardPage() {
@@ -56,19 +56,23 @@ export default function DashboardPage() {
           }`}
         >
           <nav className="p-4 space-y-1">
-            {menuItems.map((item) => (
-              <button
-                key={item.label}
-                className={`w-full text-left px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  item.active
-                    ? 'bg-blue-50 text-blue-700'
-                    : 'text-gray-700 hover:bg-gray-100'
-                }`}
-              >
-                <span className="mr-2">{item.icon}</span>
-                {item.label}
-              </button>
-            ))}
+            {menuItems.map((item) => {
+              const active = location.pathname === item.path;
+              return (
+                <button
+                  key={item.path}
+                  onClick={() => navigate(item.path)}
+                  className={`w-full text-left px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    active
+                      ? 'bg-blue-50 text-blue-700'
+                      : 'text-gray-700 hover:bg-gray-100'
+                  }`}
+                >
+                  <span className="mr-2">{item.icon}</span>
+                  {item.label}
+                </button>
+              );
+            })}
           </nav>
         </aside>
 
