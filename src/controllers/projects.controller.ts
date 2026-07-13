@@ -31,7 +31,7 @@ export const projectsController = {
   async getAll(req: Request, res: Response): Promise<void> {
     try {
       const projects = await projectsService.findAll();
-      success(res, { data: projects, count: projects.length });
+      success(res, { items: projects, count: projects.length });
     } catch (e) {
       error(res, 'Error al obtener proyectos', 500);
     }
@@ -77,7 +77,7 @@ export const projectsController = {
         error(res, 'Proyecto no encontrado', 404);
         return;
       }
-      success(res, { data: project });
+      success(res, project);
     } catch (e) {
       error(res, 'Error al obtener el proyecto', 500);
     }
@@ -122,7 +122,7 @@ export const projectsController = {
         return;
       }
       const project = await projectsService.create({ name, description, ownerId });
-      success(res, { data: project }, 'Operación exitosa', 201);
+      success(res, project, 'Operación exitosa', 201);
     } catch (e: any) {
       if (e?.code === 'P2003') {
         error(res, 'El ownerId no existe en la base de datos', 400);
@@ -175,7 +175,7 @@ export const projectsController = {
     try {
       const { name, description } = req.body as UpdateProjectDto;
       const project = await projectsService.update(req.params.id as string, { name, description });
-      success(res, { data: project });
+      success(res, project);
     } catch (e: any) {
       if (e?.code === 'P2025') {
         error(res, 'Proyecto no encontrado', 404);

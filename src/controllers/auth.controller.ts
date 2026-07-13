@@ -110,7 +110,7 @@ export const authController = {
    */
   async me(req: Request, res: Response): Promise<void> {
     try {
-      success(res, { data: req.user });
+      success(res, req.user);
     } catch (e: any) {
       error(res, 'Error al obtener el usuario', 500);
     }

@@ -48,7 +48,7 @@ export const tasksController = {
       const projectId = req.params.projectId as string;
       const status = req.query.status as string | undefined;
       const tasks = await tasksService.findByProject(projectId, status);
-      success(res, { data: tasks, count: tasks.length });
+      success(res, { items: tasks, count: tasks.length });
     } catch (e: any) { error(res, e?.message ?? 'Error al obtener tareas', e?.status ?? 500); }
   },
 
@@ -89,7 +89,7 @@ export const tasksController = {
     try {
       const task = await tasksService.findById(req.params.id as string);
       if (!task) { error(res, 'Tarea no encontrada', 404); return; }
-      success(res, { data: task });
+      success(res, task);
     } catch (e: any) { error(res, e?.message ?? 'Error al obtener la tarea', e?.status ?? 500); }
   },
 
@@ -130,7 +130,7 @@ export const tasksController = {
         req.body as CreateTaskDto,
         req.user!.userId
       );
-      success(res, { data: task }, 'Operación exitosa', 201);
+      success(res, task, 'Operación exitosa', 201);
     } catch (e: any) { error(res, e?.message ?? 'Error al crear la tarea', e?.status ?? 500); }
   },
 
@@ -180,7 +180,7 @@ export const tasksController = {
         req.body as UpdateTaskDto,
         req.user!.userId
       );
-      success(res, { data: task });
+      success(res, task);
     } catch (e: any) { error(res, e?.message ?? 'Error al actualizar la tarea', e?.status ?? 500); }
   },
 

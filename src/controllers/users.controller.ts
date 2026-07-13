@@ -35,7 +35,7 @@ export const usersController = {
   async getAll(req: Request, res: Response): Promise<void> {
     try {
       const users = await usersService.findAll();
-      success(res, { data: users, count: users.length });
+      success(res, { items: users, count: users.length });
     } catch (e) {
       error(res, 'Error al obtener usuarios', 500);
     }
@@ -81,7 +81,7 @@ export const usersController = {
         error(res, 'Usuario no encontrado', 404);
         return;
       }
-      success(res, { data: user });
+      success(res, user);
     } catch (e) {
       error(res, 'Error al obtener el usuario', 500);
     }
@@ -137,7 +137,7 @@ export const usersController = {
         return;
       }
       const user = await usersService.create({ name, email, password });
-      success(res, { data: user }, 'Operación exitosa', 201);
+      success(res, user, 'Operación exitosa', 201);
     } catch (e) {
       error(res, 'Error al crear el usuario', 500);
     }
@@ -186,7 +186,7 @@ export const usersController = {
     try {
       const { name, email } = req.body as UpdateUserDto;
       const user = await usersService.update(req.params.id as string, { name, email });
-      success(res, { data: user });
+      success(res, user);
     } catch (e: unknown) {
       if (isPrismaError(e) && e.code === 'P2025') {
         error(res, 'Usuario no encontrado', 404);
