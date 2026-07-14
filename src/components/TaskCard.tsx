@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useDraggable } from '@dnd-kit/core';
 import type { Task, TaskStatus } from '../types';
 import { KANBAN_COLUMNS } from '../config/kanban';
 
@@ -7,58 +6,71 @@ interface TaskCardProps {
   task: Task;
   onStatusChange: (taskId: string, newStatus: TaskStatus) => void;
   onDelete: (taskId: string) => void;
+  onEdit: (task: Task) => void;
+  onComments: (task: Task) => void;
+  onDragStart: (taskId: string) => void;
+  onDragEnd: () => void;
+  isDragging: boolean;
 }
 
-export function TaskCard({ task, onStatusChange, onDelete }: TaskCardProps) {
+export function TaskCard({ task, onStatusChange, onDelete, onEdit, onComments, onDragStart, onDragEnd, isDragging }: TaskCardProps) {
   const [hovered, setHovered] = useState(false);
 
-  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
-    id: task.id,
-  });
-  const style = transform
-    ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` }
-    : undefined;
+  const handleDragStart = (e: React.DragEvent) => {
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', task.id);
+    onDragStart(task.id);
+  };
 
   return (
     <div
-      ref={setNodeRef}
-      style={style}
-      {...listeners}
-      {...attributes}
+      draggable
+      onDragStart={handleDragStart}
+      onDragEnd={onDragEnd}
       className={`bg-white rounded-lg border border-slate-200 p-3 shadow-sm
                   transition cursor-grab active:cursor-grabbing
-                  ${hovered ? 'shadow-md' : ''}
-                  ${isDragging ? 'opacity-50 z-50' : ''} relative group`}
+                  ${hovered ? 'shadow-md' : ''} ${isDragging ? 'opacity-50 scale-95' : ''} relative group`}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
       {/* Botón eliminar — solo visible en hover */}
       <button
-        onClick={() => onDelete(task.id)}
-        className="absolute top-2 right-2 text-slate-300 hover:text-red-500
-                   opacity-0 group-hover:opacity-100 transition text-lg leading-none"
+        onClick={(e) => { e.stopPropagation(); onDelete(task.id); }}
+        className="absolute top-2 right-8 text-slate-300 hover:text-red-500
+                   opacity-0 group-hover:opacity-100 transition text-lg leading-none w-6 h-6 flex items-center justify-center"
+        title="Eliminar"
       >
         ×
       </button>
 
-      <p className="font-medium text-slate-800 text-sm pr-4 mb-1">{task.title}</p>
+      {/* Botón editar — solo visible en hover */}
+      <button
+        onClick={(e) => { e.stopPropagation(); onEdit(task); }}
+        className="absolute top-2 right-14 text-slate-300 hover:text-blue-500
+                   opacity-0 group-hover:opacity-100 transition text-sm leading-none w-6 h-6 flex items-center justify-center"
+        title="Editar"
+      >
+        ✏️
+      </button>
 
-      {task.description && (
-        <p className="text-xs text-slate-500 line-clamp-2 mb-2">{task.description}</p>
-      )}
+      <div onClick={() => onComments(task)} className="cursor-pointer">
+        <p className="font-medium text-slate-800 text-sm pr-4 mb-1">{task.title}</p>
 
-      <div className="flex items-center justify-between mt-2">
-        {task.assignee ? (
-          <span className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">
-            {task.assignee.name}
-          </span>
-        ) : <span />}
-
-        {(task._count?.comments ?? 0) > 0 && (
-          <span className="text-xs text-slate-400">
-            💬 {task._count?.comments}
-          </span>
+        {task.description && (
+          <p className="text-xs text-slate-500 line-clamp-2 mb-2">{task.description}</p>
         )}
+
+        <div className="flex items-center justify-between mt-2">
+          {task.assignee ? (
+            <span className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">
+              {task.assignee.name}
+            </span>
+          ) : <span />}
+
+          <span className="text-xs text-slate-400">
+            💬 {task._count?.comments ?? 0}
+          </span>
+        </div>
       </div>
 
       {/* Selector de estado */}

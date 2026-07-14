@@ -1,3 +1,4 @@
+// Wrapper que usa el backend para todas las respuestas
 export interface ApiResponse<T = unknown> {
   status: number;
   success: boolean;
@@ -72,4 +73,18 @@ export interface UpdateTaskData {
   description?: string;
   status?: TaskStatus;
   assignedTo?: string | null;
+}
+
+export interface Comment {
+  id: string;
+  content: string;
+  taskId: string;
+  userId: string;
+  createdAt: string;
+  user?: Pick<User, 'id' | 'name' | 'email'>;
+}
+
+export interface CreateCommentData {
+  content: string;
+  taskId: string;
 }

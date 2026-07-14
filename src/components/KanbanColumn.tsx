@@ -5,14 +5,41 @@ import type { KanbanColumnConfig } from '../config/kanban';
 interface KanbanColumnProps {
   config: KanbanColumnConfig;
   tasks: Task[];
+  draggingTaskId: string | null;
   onStatusChange: (taskId: string, newStatus: TaskStatus) => void;
   onDelete: (taskId: string) => void;
+  onEdit: (task: Task) => void;
+  onComments: (task: Task) => void;
   onAddTask?: () => void;
+  onDragStart: (taskId: string) => void;
+  onDragEnd: () => void;
+  onDrop: (newStatus: TaskStatus) => void;
 }
 
-export function KanbanColumn({ config, tasks, onStatusChange, onDelete, onAddTask }: KanbanColumnProps) {
+export function KanbanColumn({ config, tasks, draggingTaskId, onStatusChange, onDelete, onEdit, onComments, onAddTask, onDragStart, onDragEnd, onDrop }: KanbanColumnProps) {
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.currentTarget.classList.add('ring-2', 'ring-blue-400', 'ring-opacity-50');
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.currentTarget.classList.remove('ring-2', 'ring-blue-400', 'ring-opacity-50');
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.currentTarget.classList.remove('ring-2', 'ring-blue-400', 'ring-opacity-50');
+    onDrop(config.id);
+  };
+
   return (
-    <div className={`flex flex-col rounded-xl ${config.bgColor} min-h-50 p-3`}>
+    <div
+      className={`flex flex-col rounded-xl ${config.bgColor} min-h-[200px] p-3 transition-all ${draggingTaskId ? 'ring-2 ring-transparent' : ''}`}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
       {/* Encabezado de columna */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
@@ -38,6 +65,11 @@ export function KanbanColumn({ config, tasks, onStatusChange, onDelete, onAddTas
             task={task}
             onStatusChange={onStatusChange}
             onDelete={onDelete}
+            onEdit={onEdit}
+            onComments={onComments}
+            onDragStart={onDragStart}
+            onDragEnd={onDragEnd}
+            isDragging={draggingTaskId === task.id}
           />
         ))}
         {tasks.length === 0 && (
